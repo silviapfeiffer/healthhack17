@@ -76,8 +76,11 @@ navigator.getUserMedia = navigator.getUserMedia ||
   navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
 
 var constraints = {
-  audio: true,
-  video: true
+  audio: false,
+  video: {
+    width: { min: 1280 },
+    height: { min: 720 }
+  }
 };
 
 navigator.getUserMedia(constraints, successCallback, errorCallback);
