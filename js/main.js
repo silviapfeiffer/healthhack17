@@ -56,9 +56,11 @@ var recordedVideo = document.querySelector('video#recorded');
 var recordButton = document.querySelector('button#record');
 var playButton = document.querySelector('button#play');
 var downloadButton = document.querySelector('button#download');
+var uploadButton = document.querySelector('button#upload');
 recordButton.onclick = toggleRecording;
 playButton.onclick = play;
 downloadButton.onclick = download;
+uploadButton.onclick = upload;
 
 // window.isSecureContext could be used for Chrome
 var isSecureOrigin = location.protocol === 'https:' ||
@@ -136,6 +138,7 @@ function toggleRecording() {
     recordButton.textContent = 'Start Recording';
     playButton.disabled = false;
     downloadButton.disabled = false;
+    uploadButton.disabled = false;
   }
 }
 
@@ -167,6 +170,7 @@ function startRecording() {
   recordButton.textContent = 'Stop Recording';
   playButton.disabled = true;
   downloadButton.disabled = true;
+  uploadButton.disabled = true;
   mediaRecorder.onstop = handleStop;
   mediaRecorder.ondataavailable = handleDataAvailable;
   mediaRecorder.start(10); // collect 10ms of data
@@ -197,4 +201,30 @@ function download() {
     document.body.removeChild(a);
     window.URL.revokeObjectURL(url);
   }, 100);
+}
+
+function postAjax(url, data, success) {
+    var params = typeof data == 'string' ? data : Object.keys(data).map(
+            function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
+        ).join('&');
+
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
+    xhr.open('POST', url);
+    xhr.onreadystatechange = function() {
+        if (xhr.readyState>3 && xhr.status==200) { success(xhr.responseText); }
+    };
+    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    xhr.send(params);
+    return xhr;
+}
+
+function upload() {
+  var blob = new Blob(recordedBlobs, {type: 'video/mp4'});
+  var fd = new FormData();
+  fd.append('fname', 'test.mp4');
+  fd.append('data', blob);
+
+
+  postAjax('http://0.0.0.0:8080/uploader', fd, function(data){ console.log(data); });
 }
