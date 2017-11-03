@@ -180,17 +180,17 @@ function stopRecording() {
 }
 
 function play() {
-  var superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
+  var superBuffer = new Blob(recordedBlobs, {type: 'video/mp4'});
   recordedVideo.src = window.URL.createObjectURL(superBuffer);
 }
 
 function download() {
-  var blob = new Blob(recordedBlobs, {type: 'video/webm'});
+  var blob = new Blob(recordedBlobs, {type: 'video/mp4'});
   var url = window.URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.style.display = 'none';
   a.href = url;
-  a.download = 'test.webm';
+  a.download = 'test.mp4';
   document.body.appendChild(a);
   a.click();
   setTimeout(function() {
