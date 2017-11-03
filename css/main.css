@@ -15,10 +15,10 @@ p.borderBelow {
 }
 
 video {
-  height: 232px;
+  height: 320px;
   margin: 0 12px 20px 0;
   vertical-align: top;
-  width: calc(20em - 10px);
+/*  width: calc(20em - 10px); */
 }
 
 
