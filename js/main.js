@@ -116,7 +116,7 @@ function errorCallback(error) {
 
 function handleSourceOpen(event) {
   console.log('MediaSource opened');
-  sourceBuffer = mediaSource.addSourceBuffer('video/mp4"');
+  sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="vp8"');
   console.log('Source buffer: ', sourceBuffer);
 }
 
@@ -144,19 +144,19 @@ function toggleRecording() {
 
 // The nested try blocks will be simplified when Chrome 47 moves to Stable
 function startRecording() {
-  var options = {mimeType: 'video/mp4', bitsPerSecond: 100000};
+  var options = {mimeType: 'video/webm', bitsPerSecond: 100000};
   recordedBlobs = [];
   try {
     mediaRecorder = new MediaRecorder(window.stream, options);
   } catch (e0) {
     console.log('Unable to create MediaRecorder with options Object: ', e0);
     try {
-      options = {mimeType: 'video/mp4', bitsPerSecond: 100000};
+      options = {mimeType: 'video/webm', bitsPerSecond: 100000};
       mediaRecorder = new MediaRecorder(window.stream, options);
     } catch (e1) {
       console.log('Unable to create MediaRecorder with options Object: ', e1);
       try {
-        options = 'video/mp4'; // Chrome 47
+        options = 'video/webm'; // Chrome 47
         mediaRecorder = new MediaRecorder(window.stream, options);
       } catch (e2) {
         alert('MediaRecorder is not supported by this browser.\n\n' +
@@ -184,17 +184,17 @@ function stopRecording() {
 }
 
 function play() {
-  var superBuffer = new Blob(recordedBlobs, {type: 'video/mp4'});
+  var superBuffer = new Blob(recordedBlobs, {type: 'video/webm'});
   recordedVideo.src = window.URL.createObjectURL(superBuffer);
 }
 
 function download() {
-  var blob = new Blob(recordedBlobs, {type: 'video/mp4'});
+  var blob = new Blob(recordedBlobs, {type: 'video/webm'});
   var url = window.URL.createObjectURL(blob);
   var a = document.createElement('a');
   a.style.display = 'none';
   a.href = url;
-  a.download = 'test.mp4';
+  a.download = 'test.webm';
   document.body.appendChild(a);
   a.click();
   setTimeout(function() {
@@ -203,28 +203,25 @@ function download() {
   }, 100);
 }
 
-function postAjax(url, data, success) {
-    var params = typeof data == 'string' ? data : Object.keys(data).map(
-            function(k){ return encodeURIComponent(k) + '=' + encodeURIComponent(data[k]) }
-        ).join('&');
-
-    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject("Microsoft.XMLHTTP");
-    xhr.open('POST', url);
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState>3 && xhr.status==200) { success(xhr.responseText); }
-    };
-    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-    xhr.send(params);
-    return xhr;
-}
-
 function upload() {
-  var blob = new Blob(recordedBlobs, {type: 'video/mp4'});
+  var blob = new Blob(recordedBlobs, {type: 'video/webm'});
   var fd = new FormData();
-  fd.append('fname', 'test.mp4');
+  fd.append('fname', 'test.webm');
   fd.append('data', blob);
 
+  var oReq = new XMLHttpRequest();
+  oReq.open("POST", 'http://localhost:8080/uploader', true);
+  oReq.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  oReq.onload = function (oEvent) {
+    // Uploaded.
+    console.log(this.responseText);
+  };
 
-  postAjax('http://0.0.0.0:8080/uploader', fd, function(data){ console.log(data); });
+  oReq.onreadystatechange = function() {//Call a function when the state changes.
+      if(oReq.readyState == 4 && oReq.status == 200) {
+          alert(oReq.responseText);
+      }
+  }
+  oReq.send(fd);
+
 }
